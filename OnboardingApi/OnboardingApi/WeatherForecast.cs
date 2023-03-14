@@ -1,4 +1,4 @@
-﻿namespace onboarding_api;
+﻿namespace OnboardingApi;
 
 public class WeatherForecast
 {
