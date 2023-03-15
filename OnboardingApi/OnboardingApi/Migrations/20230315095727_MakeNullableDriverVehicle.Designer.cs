@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnboardingApi.Entities;
 
@@ -11,9 +12,11 @@ using OnboardingApi.Entities;
 namespace OnboardingApi.Migrations
 {
     [DbContext(typeof(DriversContext))]
-    partial class DriversContextModelSnapshot : ModelSnapshot
+    [Migration("20230315095727_MakeNullableDriverVehicle")]
+    partial class MakeNullableDriverVehicle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,6 +51,45 @@ namespace OnboardingApi.Migrations
                     b.ToTable("Driver");
                 });
 
+            modelBuilder.Entity("OnboardingApi.Entities.Make", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Make");
+                });
+
+            modelBuilder.Entity("OnboardingApi.Entities.Model", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MakeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MakeId");
+
+                    b.ToTable("Model");
+                });
+
             modelBuilder.Entity("OnboardingApi.Entities.Vehicle", b =>
                 {
                     b.Property<int>("Id")
@@ -59,6 +101,9 @@ namespace OnboardingApi.Migrations
                     b.Property<int>("Mileage")
                         .HasColumnType("int");
 
+                    b.Property<int>("ModelId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ProductionYear")
                         .HasColumnType("int");
 
@@ -67,6 +112,8 @@ namespace OnboardingApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ModelId");
 
                     b.ToTable("Vehicle");
                 });
@@ -78,6 +125,28 @@ namespace OnboardingApi.Migrations
                         .HasForeignKey("VehicleId");
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("OnboardingApi.Entities.Model", b =>
+                {
+                    b.HasOne("OnboardingApi.Entities.Make", "Make")
+                        .WithMany()
+                        .HasForeignKey("MakeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Make");
+                });
+
+            modelBuilder.Entity("OnboardingApi.Entities.Vehicle", b =>
+                {
+                    b.HasOne("OnboardingApi.Entities.Model", "Model")
+                        .WithMany()
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Model");
                 });
 #pragma warning restore 612, 618
         }
