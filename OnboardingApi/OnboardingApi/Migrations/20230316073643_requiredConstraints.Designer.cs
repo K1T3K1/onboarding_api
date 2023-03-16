@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnboardingApi.Entities;
 
@@ -11,9 +12,11 @@ using OnboardingApi.Entities;
 namespace OnboardingApi.Migrations
 {
     [DbContext(typeof(DriversContext))]
-    partial class DriversContextModelSnapshot : ModelSnapshot
+    [Migration("20230316073643_requiredConstraints")]
+    partial class requiredConstraints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,9 +53,7 @@ namespace OnboardingApi.Migrations
                     b.HasIndex("LicenseId")
                         .IsUnique();
 
-                    b.HasIndex("VehicleId")
-                        .IsUnique()
-                        .HasFilter("[VehicleId] IS NOT NULL");
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Driver");
                 });
@@ -64,9 +65,6 @@ namespace OnboardingApi.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("DriverId")
-                        .HasColumnType("int");
 
                     b.Property<int>("Mileage")
                         .HasColumnType("int");
@@ -89,15 +87,10 @@ namespace OnboardingApi.Migrations
             modelBuilder.Entity("OnboardingApi.Entities.Driver", b =>
                 {
                     b.HasOne("OnboardingApi.Entities.Vehicle", "Vehicle")
-                        .WithOne("Driver")
-                        .HasForeignKey("OnboardingApi.Entities.Driver", "VehicleId");
+                        .WithMany()
+                        .HasForeignKey("VehicleId");
 
                     b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("OnboardingApi.Entities.Vehicle", b =>
-                {
-                    b.Navigation("Driver");
                 });
 #pragma warning restore 612, 618
         }

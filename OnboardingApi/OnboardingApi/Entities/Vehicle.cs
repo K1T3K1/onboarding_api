@@ -1,6 +1,5 @@
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
 namespace OnboardingApi.Entities
 {
     public class Vehicle
@@ -8,6 +7,9 @@ namespace OnboardingApi.Entities
         public int Id{get;set;}
         public int ProductionYear{get;set;}
         public int Mileage { get; set; }
+        [Required]
         public string SerialNumber{get;set;}
+        public int? DriverId{get;set;}
+        public virtual Driver? Driver{get;set;}
     }
 }

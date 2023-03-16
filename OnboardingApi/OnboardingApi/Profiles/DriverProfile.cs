@@ -8,10 +8,9 @@ namespace OnboardingApi
     {
         public DriverProfile()
         {
-            CreateMap<Driver, DriverDetailsDto>()
-                .ForMember(d => d.SerialNumber, map => map.MapFrom(driver => driver.Vehicle.SerialNumber));
             CreateMap<DriverDto, Driver>();
-            CreateMap<DriverVehicleDto, Driver>().IncludeBase<DriverDto, Driver>();
+            CreateMap<Driver, DriverDto>().ForMember(d => d.SerialNumber, opt => opt.MapFrom(d => d.Vehicle.SerialNumber));
+            CreateMap<DriverOnlyDto, Driver>();
         }
     }
 }
