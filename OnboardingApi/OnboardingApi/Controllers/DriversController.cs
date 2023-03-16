@@ -26,7 +26,7 @@ namespace OnboardingApi.Controllers
             return return_drivers;
         }
 
-        [HttpGet("licenseId")]
+        [HttpGet("{licenseId}")]
         public ActionResult<DriverDto> Get(string licenseId)
         {
             var driver = GetDriver(licenseId);
@@ -41,6 +41,10 @@ namespace OnboardingApi.Controllers
             {
                 return BadRequest(ModelState);
             }
+            if(!IsValidLicenseID(model.LicenseId))
+            {
+                return BadRequest("Driver with Identical LicenseID already exists");
+            }
             var driver = _mapper.Map<Driver>(model);
             _driversContext.Driver.Add(driver);
             _driversContext.SaveChanges();
@@ -49,8 +53,8 @@ namespace OnboardingApi.Controllers
             return Created("api/[controller]/" + key, null);
         }
 
-        [HttpPut]
-        public ActionResult Put([FromBody]AssignVehicleDto model)
+        [HttpPut("/assign-vehicle")]
+        public ActionResult PutVehicle([FromBody]AssignVehicleDto model)
         {
             Vehicle? vehicle = GetVehicle(model.SerialNumber);
             Driver? driver = GetDriver(model.LicenseId);
@@ -63,12 +67,59 @@ namespace OnboardingApi.Controllers
                 return NotFound("No such driver");
             }
             driver.VehicleId = vehicle.Id;
+            vehicle.DriverId = driver.Id;
             _driversContext.SaveChanges();
             var key = driver.Name.ToLower() + "-" + driver.Surname.ToLower();
             return Ok("api/[controller]/" + key);
         }
 
-        [HttpDelete("licenseId")]
+        [HttpPut("/{licenseId}/change-name/{name}")]
+        public ActionResult PutName(string licenseId, string name)
+        {
+            Driver? driver = GetDriver(licenseId);
+            if (driver == null)
+            {
+                return NotFound("No such driver");
+            }
+            driver.Name = name;
+            _driversContext.SaveChanges();
+            var key = driver.Name.ToLower()+ "-" + driver.Surname.ToLower();
+            return Ok("api/[controller]/" + key);
+        }
+
+        [HttpPut("/{licenseId}/change-surname/{surname}")]
+        public ActionResult PutSurname(string licenseId, string surname)
+        {
+            Driver? driver = GetDriver(licenseId);
+            if (driver == null)
+            {
+                return NotFound("No such driver");
+            }
+            driver.Surname = surname;
+            _driversContext.SaveChanges();
+            var key = driver.Name.ToLower()+ "-" + driver.Surname.ToLower();
+            return Ok("api/[controller]/" + key);
+        }
+
+        [HttpPut("/{oldLicenseId}/change-licenseid/{newLicenseId}")]
+        public ActionResult PutLicenseId(string oldLicenseId, string newLicenseId)
+        {
+            Driver? driver = GetDriver(oldLicenseId);
+            if (driver == null)
+            {
+                return NotFound("No such driver");
+            }
+            if(!IsValidLicenseID(newLicenseId))
+            {
+                return BadRequest("Driver with Identical LicenseID already exists");
+            }
+            driver.LicenseId = newLicenseId;
+            _driversContext.SaveChanges();
+            var key = driver.Name.ToLower()+ "-" + driver.Surname.ToLower();
+            return Ok("api/[controller]/" + key);
+        }
+
+        [HttpDelete("{licenseId}")]
         public ActionResult Delete(string licenseId)
         {
             var driver = GetDriver(licenseId);
@@ -107,6 +158,15 @@ namespace OnboardingApi.Controllers
                 
                 return null;
             }
+        }
+
+        private bool IsValidLicenseID(string licenseId)
+        {
+            if (_driversContext.Driver.Where(d => d.LicenseId.ToLower() == licenseId.ToLower()).ToList().Any() == true)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

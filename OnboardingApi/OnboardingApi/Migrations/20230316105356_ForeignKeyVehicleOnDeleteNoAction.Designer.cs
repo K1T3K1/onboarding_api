@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnboardingApi.Entities;
 
@@ -11,9 +12,11 @@ using OnboardingApi.Entities;
 namespace OnboardingApi.Migrations
 {
     [DbContext(typeof(DriversContext))]
-    partial class DriversContextModelSnapshot : ModelSnapshot
+    [Migration("20230316105356_ForeignKeyVehicleOnDeleteNoAction")]
+    partial class ForeignKeyVehicleOnDeleteNoAction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,7 +94,7 @@ namespace OnboardingApi.Migrations
                     b.HasOne("OnboardingApi.Entities.Vehicle", "Vehicle")
                         .WithOne("Driver")
                         .HasForeignKey("OnboardingApi.Entities.Driver", "VehicleId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Vehicle");
                 });

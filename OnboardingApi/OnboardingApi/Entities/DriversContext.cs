@@ -12,8 +12,8 @@ namespace OnboardingApi.Entities
         {
             modelBuilder.Entity<Vehicle>().HasIndex(v => v.SerialNumber).IsUnique();
             modelBuilder.Entity<Driver>().HasIndex(d => d.LicenseId).IsUnique();
-            modelBuilder.Entity<Driver>().HasOne(d => d.Vehicle).WithOne(v => v.Driver);
-            modelBuilder.Entity<Vehicle>().HasOne(v => v.Driver).WithOne(d => d.Vehicle);
+            modelBuilder.Entity<Driver>().HasOne(d => d.Vehicle).WithOne(v => v.Driver).OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Vehicle>().HasOne(v => v.Driver).WithOne(d => d.Vehicle).OnDelete(DeleteBehavior.SetNull);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

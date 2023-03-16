@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace OnboardingApi.Entities
@@ -10,6 +11,7 @@ namespace OnboardingApi.Entities
         [Required]
         public string SerialNumber{get;set;}
         public int? DriverId{get;set;}
+        [ForeignKey("DriverId")]
         public virtual Driver? Driver{get;set;}
     }
 }

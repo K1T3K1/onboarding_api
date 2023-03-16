@@ -7,15 +7,11 @@ namespace OnboardingApi.Models
         public string SerialNumber { get; set; }
     }
 
-    public class VehicleDriverDto : VehicleDto
-    {
-        public int DriverId { get; set; }
-    }
-
-    public class VehicleDriverDetailsDto : VehicleDto
+    public class VehicleWithDriverDetailsDto : VehicleDto
     {
         public string DriverName { get; set; }
         public string DriverSurname { get; set; }
+        public string LicenseId { get; set; }
     }
 
 }
