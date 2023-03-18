@@ -22,20 +22,20 @@ namespace OnboardingApi.Controllers
         public ActionResult<IEnumerable<DriverDto>> Get()
         {
             var drivers = _driversContext.Driver.Include(d => d.Vehicle).ToList();
-            var return_drivers = _mapper.Map<List<DriverDto>>(drivers);
-            return return_drivers;
+            var returnDrivers = _mapper.Map<List<DriverDto>>(drivers);
+            return returnDrivers;
         }
 
         [HttpGet("{licenseId}")]
         public ActionResult<DriverDto> Get(string licenseId)
         {
             var driver = GetDriver(licenseId);
-            var return_driver = _mapper.Map<DriverDto>(driver);
-            return return_driver;
+            var returnDriver = _mapper.Map<DriverDto>(driver);
+            return returnDriver;
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] DriverOnlyDto model)
+        async public Task<ActionResult> Post([FromBody] DriverOnlyDto model)
         {
             if(!ModelState.IsValid)
             {
@@ -47,10 +47,8 @@ namespace OnboardingApi.Controllers
             }
             var driver = _mapper.Map<Driver>(model);
             _driversContext.Driver.Add(driver);
-            _driversContext.SaveChanges();
-
-            var key = driver.Name.ToLower() + "-" + driver.Surname.ToLower();
-            return Created("api/[controller]/" + key, null);
+            await _driversContext.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpPut("/assign-vehicle")]
@@ -69,8 +67,7 @@ namespace OnboardingApi.Controllers
             driver.VehicleId = vehicle.Id;
             vehicle.DriverId = driver.Id;
             _driversContext.SaveChanges();
-            var key = driver.Name.ToLower() + "-" + driver.Surname.ToLower();
-            return Ok("api/[controller]/" + key);
+            return Ok();
         }
 
         [HttpPut("/{licenseId}/change-name/{name}")]
@@ -84,7 +81,7 @@ namespace OnboardingApi.Controllers
             driver.Name = name;
             _driversContext.SaveChanges();
             var key = driver.Name.ToLower()+ "-" + driver.Surname.ToLower();
-            return Ok("api/[controller]/" + key);
+            return Ok();
         }
 
         [HttpPut("/{licenseId}/change-surname/{surname}")]
@@ -98,7 +95,7 @@ namespace OnboardingApi.Controllers
             driver.Surname = surname;
             _driversContext.SaveChanges();
             var key = driver.Name.ToLower()+ "-" + driver.Surname.ToLower();
-            return Ok("api/[controller]/" + key);
+            return Ok();
         }
 
         [HttpPut("/{oldLicenseId}/change-licenseid/{newLicenseId}")]
@@ -116,7 +113,7 @@ namespace OnboardingApi.Controllers
             driver.LicenseId = newLicenseId;
             _driversContext.SaveChanges();
             var key = driver.Name.ToLower()+ "-" + driver.Surname.ToLower();
-            return Ok("api/[controller]/" + key);
+            return Ok();
         }
 
         [HttpDelete("{licenseId}")]
@@ -148,10 +145,10 @@ namespace OnboardingApi.Controllers
 
         private Vehicle? GetVehicle(string serialNumber)
         {
-            var vehicle = _driversContext.Vehicle.Where(v => v.SerialNumber.ToLower() == serialNumber.ToLower()).ToList();
-            if(vehicle.Any())
+            var vehicle = _driversContext.Vehicle.FirstOrDefault(v => v.SerialNumber.ToLower() == serialNumber.ToLower());
+            if(vehicle != null)
             {
-                return vehicle.First();
+                return vehicle;
             }
             else
             {
@@ -162,7 +159,7 @@ namespace OnboardingApi.Controllers
 
         private bool IsValidLicenseID(string licenseId)
         {
-            if (_driversContext.Driver.Where(d => d.LicenseId.ToLower() == licenseId.ToLower()).ToList().Any() == true)
+            if (_driversContext.Driver.FirstOrDefault(d => d.LicenseId.ToLower() == licenseId.ToLower()) != null)
             {
                 return false;
             }

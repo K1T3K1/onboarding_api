@@ -27,8 +27,8 @@ namespace OnboardingApi.Controllers
         public ActionResult<IEnumerable<VehicleWithDriverDetailsDto>> Get()
         {
             var vehicles = _driversContext.Vehicle.Include(v => v.Driver).ToList();
-            var return_vehicles = _mapper.Map<List<VehicleWithDriverDetailsDto>>(vehicles);
-            return return_vehicles;
+            var returnVehicles = _mapper.Map<List<VehicleWithDriverDetailsDto>>(vehicles);
+            return returnVehicles;
         }
         
         [HttpGet("/{serialNumber}")]
@@ -39,12 +39,12 @@ namespace OnboardingApi.Controllers
             {
                 return NotFound("No such vehicle");
             }
-            var return_vehicle = _mapper.Map<VehicleWithDriverDetailsDto>(vehicle);
-            return return_vehicle;
+            var returnVehicle = _mapper.Map<VehicleWithDriverDetailsDto>(vehicle);
+            return returnVehicle;
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] VehicleDto model)
+        async public Task<ActionResult> Post([FromBody] VehicleDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -56,10 +56,10 @@ namespace OnboardingApi.Controllers
             }
             var vehicle = _mapper.Map<Vehicle>(model);
             _driversContext.Vehicle.Add(vehicle);
-            _driversContext.SaveChanges();
+            await _driversContext.SaveChangesAsync();
 
             var key = vehicle.SerialNumber.ToUpper();
-            return Created("api/controller/" + key, null);
+            return Ok();
         }
 
         [HttpPut("/{serialNumber}/change-year/{productionYear}")]
@@ -73,7 +73,7 @@ namespace OnboardingApi.Controllers
             vehicle.ProductionYear = productionYear;
             _driversContext.SaveChanges();
 
-            return Ok("api/[controller]/" + vehicle.SerialNumber);
+            return Ok();
         }
 
         [HttpPut("/{serialNumber}/change-mileage/{mileage}")]
@@ -87,7 +87,7 @@ namespace OnboardingApi.Controllers
             vehicle.Mileage = mileage;
             _driversContext.SaveChanges();
 
-            return Ok("api/[controller]/" + vehicle.SerialNumber);
+            return Ok();
         }
 
         [HttpPut("/{oldSerialNumber}/change-sn/{newSerialNumber}")]
@@ -105,7 +105,7 @@ namespace OnboardingApi.Controllers
             vehicle.SerialNumber = newSerialNumber;
             _driversContext.SaveChanges();
 
-            return Ok("api/[controller]/" + vehicle.SerialNumber);
+            return Ok();
         }
 
         [HttpDelete("{serialNumber}")]
@@ -124,10 +124,10 @@ namespace OnboardingApi.Controllers
 
         private Vehicle? GetVehicle(string serialNumber)
         {
-            var vehicle = _driversContext.Vehicle.Where(v => v.SerialNumber.ToLower() == serialNumber.ToLower()).ToList();
-            if (vehicle.Any())
+            var vehicle = _driversContext.Vehicle.FirstOrDefault(v => v.SerialNumber.ToLower() == serialNumber.ToLower());
+            if (vehicle != null)
             {
-                return vehicle.First();
+                return vehicle;
             }
             else
             {
@@ -138,7 +138,7 @@ namespace OnboardingApi.Controllers
 
         private bool IsValidSN(string serialNumber)
         {
-            if (_driversContext.Vehicle.Where(v => v.SerialNumber.ToLower() == serialNumber.ToLower()).ToList().Any() == true)
+            if (_driversContext.Vehicle.FirstOrDefault(v => v.SerialNumber.ToLower() == serialNumber.ToLower()) != null)
             {
                 return false;
             }
